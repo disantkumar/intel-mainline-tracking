@@ -80,6 +80,8 @@ CFLAGS_patch-scs.o			+= -mbranch-protection=none
 $(obj)/vdso-wrap.o: $(obj)/vdso/vdso.so
 $(obj)/vdso32-wrap.o: $(obj)/vdso32/vdso.so
 
+obj-$(CONFIG_ALT_SYSCALL)		+= alt-syscall.o
+
 obj-y					+= probes/
 obj-y					+= head.o
 extra-y					+= vmlinux.lds
