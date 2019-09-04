@@ -1096,6 +1096,7 @@ EXPORT_SYMBOL(ttm_bo_unmap_virtual);
  */
 int ttm_bo_wait_ctx(struct ttm_buffer_object *bo, struct ttm_operation_ctx *ctx)
 {
+	long timeout = CONFIG_DRM_TTM_BO_WAIT_TIMEOUT * HZ;
 	long ret;
 
 	if (ctx->no_wait_gpu) {
@@ -1107,7 +1108,7 @@ int ttm_bo_wait_ctx(struct ttm_buffer_object *bo, struct ttm_operation_ctx *ctx)
 	}
 
 	ret = dma_resv_wait_timeout(bo->base.resv, DMA_RESV_USAGE_BOOKKEEP,
-				    ctx->interruptible, 15 * HZ);
+				    ctx->interruptible, timeout);
 	if (unlikely(ret < 0))
 		return ret;
 	if (unlikely(ret == 0))
