@@ -168,7 +168,7 @@ bool kvm_is_zone_device_page(struct page *page)
 	 * the device has been pinned, e.g. by get_user_pages().  WARN if the
 	 * page_count() is zero to help detect bad usage of this helper.
 	 */
-	if (WARN_ON_ONCE(!page_count(page)))
+	if (!page_count(page))
 		return false;
 
 	return is_zone_device_page(page);
