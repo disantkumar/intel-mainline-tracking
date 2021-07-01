@@ -92,6 +92,7 @@ struct virtwl_vfd {
 
 	struct list_head in_queue; /* list of virtwl_vfd_qentry */
 	wait_queue_head_t in_waitq;
+	struct device *dev;
 };
 
 struct virtwl_info {
@@ -1343,6 +1344,138 @@ static long virtwl_ioctl_dmabuf_sync(struct file *filp, void __user *ptr)
 	return virtwl_vfd_dmabuf_sync(filp, ioctl_dmabuf_sync.flags);
 }
 
+static void dmabuf_unmap_addr(struct device *dev, struct scatterlist *sgl,
+			      int nents, enum dma_data_direction dir,
+			      unsigned long attrs)
+{
+	struct scatterlist *sg;
+	int i;
+
+	for_each_sg(sgl, sg, nents, i)
+		dma_unmap_resource(dev, sg_dma_address(sg), sg_dma_len(sg),
+				   dir, attrs);
+}
+
+static struct sg_table *get_sg_table(struct device *dev, struct dma_buf *buf,
+				     enum dma_data_direction direction)
+{
+	struct virtwl_vfd *vfd = buf->priv;
+	struct sg_table *sg;
+	struct scatterlist *sl;
+	u32 page_num;
+	int i;
+	int ret;
+
+	sg = kzalloc(sizeof(*sg), GFP_KERNEL);
+	if (!sg)
+		return ERR_PTR(-ENOMEM);
+
+	page_num = DIV_ROUND_UP(vfd->size, PAGE_SIZE);
+	ret = sg_alloc_table(sg, page_num, GFP_KERNEL);
+	if (ret) {
+		kfree(sg);
+		return NULL;
+	}
+
+	for_each_sg(sg->sgl, sl, page_num, i) {
+		sl->offset = 0;
+		sl->length = PAGE_SIZE;
+		sg_dma_len(sl) = PAGE_SIZE;
+		sg_dma_address(sl) =
+			dma_map_resource(dev,
+							 (vfd->pfn + i) << PAGE_SHIFT,
+							 sl->length,
+							 direction,
+							 DMA_ATTR_SKIP_CPU_SYNC);
+		if (dma_mapping_error(dev, sl->dma_address))
+			goto unmap;
+	}
+
+	return sg;
+
+unmap:
+	dmabuf_unmap_addr(dev, sg->sgl, i, direction, DMA_ATTR_SKIP_CPU_SYNC);
+	sg_free_table(sg);
+	kfree(sg);
+	return ERR_PTR(ret);
+}
+
+static void put_sg_table(struct device *dev, struct sg_table *sg,
+			 enum dma_data_direction direction)
+{
+	dmabuf_unmap_addr(dev, sg->sgl, sg->nents, direction, DMA_ATTR_SKIP_CPU_SYNC);
+	sg_free_table(sg);
+	kfree(sg);
+}
+
+static struct sg_table *map_virtwl_dmabuf(struct dma_buf_attachment *at,
+				    enum dma_data_direction direction)
+{
+	return get_sg_table(at->dev, at->dmabuf, direction);
+}
+
+static void unmap_virtwl_dmabuf(struct dma_buf_attachment *at,
+			  struct sg_table *sg,
+			  enum dma_data_direction direction)
+{
+	return put_sg_table(at->dev, sg, direction);
+}
+
+static void release_virtwl_dmabuf(struct dma_buf *buf)
+{
+	;
+}
+
+static int begin_cpu_virtwl_dmabuf(struct dma_buf *buf,
+			     enum dma_data_direction direction)
+{
+	return 0;
+}
+
+static int end_cpu_virtwl_dmabuf(struct dma_buf *buf,
+			   enum dma_data_direction direction)
+{
+	return 0;
+}
+
+static int mmap_virtwl_dmabuf(struct dma_buf *buf, struct vm_area_struct *vma)
+{
+	return 0;
+}
+
+static const struct dma_buf_ops virtwl_dmabuf_ops = {
+	.map_dma_buf	   = map_virtwl_dmabuf,
+	.unmap_dma_buf	   = unmap_virtwl_dmabuf,
+	.release	   = release_virtwl_dmabuf,
+	.mmap		   = mmap_virtwl_dmabuf,
+	.begin_cpu_access  = begin_cpu_virtwl_dmabuf,
+	.end_cpu_access    = end_cpu_virtwl_dmabuf,
+};
+
+static long virtwl_ioctl_export_dmabuf(struct file *filp, void __user *ptr)
+{
+	DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
+	struct virtwl_vfd *vfd = filp->private_data;
+	struct dma_buf *buf;
+	int ret = -EINVAL;
+
+	exp_info.ops  = &virtwl_dmabuf_ops;
+	exp_info.size = vfd->size;
+	exp_info.priv = vfd;
+	exp_info.flags = O_CLOEXEC | O_RDWR;
+
+	buf = dma_buf_export(&exp_info);
+	if (IS_ERR(buf)) {
+		ret = PTR_ERR(buf);
+		goto err;
+	}
+
+	return dma_buf_fd(buf, O_CLOEXEC | O_RDWR);
+
+err:
+	return ret;
+}
+
 static long virtwl_vfd_ioctl(struct file *filp, unsigned int cmd,
 			     void __user *ptr)
 {
@@ -1353,6 +1486,8 @@ static long virtwl_vfd_ioctl(struct file *filp, unsigned int cmd,
 		return virtwl_ioctl_recv(filp, ptr);
 	case VIRTWL_IOCTL_DMABUF_SYNC:
 		return virtwl_ioctl_dmabuf_sync(filp, ptr);
+	case VIRTWL_IOCTL_EXPORT_DMABUF:
+		return virtwl_ioctl_export_dmabuf(filp, ptr);
 	default:
 		return -ENOTTY;
 	}
@@ -1386,6 +1521,8 @@ static long virtwl_ioctl_new(struct file *filp, void __user *ptr,
 		do_vfd_close(vfd);
 		return ret;
 	}
+
+	vfd->dev = vi->dev;
 
 	ioctl_new.fd = ret;
 	ret = copy_to_user(ptr, &ioctl_new, size);
@@ -1523,7 +1660,6 @@ static int probe_common(struct virtio_device *vdev)
 
 	virtio_device_ready(vdev);
 	virtqueue_kick(vi->vqs[VIRTWL_VQ_IN]);
-
 
 	return 0;
 

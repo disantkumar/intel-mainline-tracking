@@ -64,4 +64,6 @@ struct virtwl_ioctl_dmabuf_sync {
 #define VIRTWL_IOCTL_DMABUF_SYNC VIRTWL_IOR(0x03, \
 					    struct virtwl_ioctl_dmabuf_sync)
 
+#define VIRTWL_IOCTL_EXPORT_DMABUF VIRTWL_IO(0x04)
+
 #endif /* _LINUX_VIRTWL_H */
