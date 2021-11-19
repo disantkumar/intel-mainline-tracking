@@ -123,4 +123,7 @@ u64 timer_get_cval(struct arch_timer_context *ctxt);
 void kvm_timer_cpu_up(void);
 void kvm_timer_cpu_down(void);
 
+/* Nedded for debugfs */
+u64 timer_get_offset(struct arch_timer_context *ctxt);
+
 #endif
