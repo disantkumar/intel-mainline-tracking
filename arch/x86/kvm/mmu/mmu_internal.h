@@ -239,6 +239,7 @@ struct kvm_page_fault {
 	unsigned long mmu_seq;
 	kvm_pfn_t pfn;
 	hva_t hva;
+	struct page *page;
 	bool map_writable;
 };
 
