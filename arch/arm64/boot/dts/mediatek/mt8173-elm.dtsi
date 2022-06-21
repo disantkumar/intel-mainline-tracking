@@ -289,8 +289,8 @@
 		};
 
 		aux-bus {
-			panel: panel {
-				compatible = "lg,lp120up1";
+			panel {
+				compatible = "edp-panel";
 				power-supply = <&panel_fixed_3v3>;
 				backlight = <&backlight>;
 
