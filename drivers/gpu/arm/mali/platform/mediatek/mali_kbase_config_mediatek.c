@@ -35,6 +35,11 @@ static const struct kbase_platform_specific_conf mediatek_mt8186_data = {
 	.platform_funcs = &mt8186_platform_funcs,
 };
 
+static const struct kbase_platform_specific_conf mediatek_mt8188_data = {
+	.pm_callbacks = &mt8188_pm_callbacks,
+	.platform_funcs = &mt8188_platform_funcs,
+};
+
 const struct of_device_id kbase_dt_ids[] = {
 	{ .compatible = "arm,malit6xx" },
 	{ .compatible = "arm,mali-midgard" },
@@ -44,6 +49,7 @@ const struct of_device_id kbase_dt_ids[] = {
 	{ .compatible = "mediatek,mt8192-mali", .data = &mediatek_mt8192_data },
 	{ .compatible = "mediatek,mt8195-mali", .data = &mediatek_mt8195_data },
 	{ .compatible = "mediatek,mt8186-mali", .data = &mediatek_mt8186_data },
+	{ .compatible = "mediatek,mt8188-mali", .data = &mediatek_mt8188_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, kbase_dt_ids);
