@@ -8380,6 +8380,15 @@ structure.
 When getting the Modified Change Topology Report value, the attr->addr
 must point to a byte where the value will be stored or retrieved from.
 
+8.40 KVM_CAP_UCLAMP_SYNC
+------------------------
+
+:Architectures: arm64
+
+This capability indicates that the KVM uclamp sync service is supported
+in the host. A VMM can check whether the service is available to the
+guest on migration.
+
 9. Known KVM API problems
 =========================
 

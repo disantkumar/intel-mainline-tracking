@@ -221,6 +221,7 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
 	case KVM_CAP_PTP_KVM:
 	case KVM_CAP_ARM_SYSTEM_SUSPEND:
 	case KVM_CAP_IRQFD_RESAMPLE:
+	case KVM_CAP_UCLAMP_SYNC:
 		r = 1;
 		break;
 	case KVM_CAP_SET_GUEST_DEBUG2:
