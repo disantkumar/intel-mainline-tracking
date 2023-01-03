@@ -87,7 +87,7 @@ static const struct acpi_device_id chromeos_device_ids[] = {
 MODULE_DEVICE_TABLE(acpi, chromeos_device_ids);
 
 static int chromeos_device_add(struct acpi_device *device);
-static int chromeos_device_remove(struct acpi_device *device);
+static void chromeos_device_remove(struct acpi_device *device);
 
 static struct chromeos_acpi_if chromeos_acpi_if_data;
 static struct acpi_driver chromeos_acpi_driver = {
@@ -655,9 +655,8 @@ static int chromeos_device_add(struct acpi_device *device)
 	return 0;
 }
 
-static int chromeos_device_remove(struct acpi_device *device)
+static void chromeos_device_remove(struct acpi_device *device)
 {
-	return 0;
 }
 
 static int __init chromeos_acpi_init(void)
