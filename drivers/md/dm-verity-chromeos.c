@@ -64,7 +64,7 @@ static int chromeos_invalidate_kernel_submit(struct bio *bio,
 	bio->bi_iter.bi_idx = 0;
 	bio->bi_iter.bi_size = block_size;
 	bio->bi_iter.bi_bvec_done = 0;
-	bio_set_op_attrs(bio, op, op_flags);
+	bio->bi_opf =  op | op_flags;
 	bio->bi_io_vec[0].bv_page = page;
 	bio->bi_io_vec[0].bv_len = block_size;
 	bio->bi_io_vec[0].bv_offset = 0;
