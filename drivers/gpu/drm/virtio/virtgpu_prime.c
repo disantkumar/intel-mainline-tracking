@@ -22,8 +22,11 @@
  * Authors: Andreas Pokorny
  */
 
+#include <drm/drm_gem_shmem_helper.h>
+#include <drm/virtgpu_drm.h>
 #include <drm/drm_prime.h>
 #include <linux/virtio_dma_buf.h>
+#include <linux/scatterlist.h>
 
 #include "virtgpu_drv.h"
 
@@ -166,5 +169,71 @@ struct drm_gem_object *virtgpu_gem_prime_import_sg_table(
 	struct drm_device *dev, struct dma_buf_attachment *attach,
 	struct sg_table *table)
 {
-	return ERR_PTR(-ENODEV);
+  struct virtio_gpu_device *vgdev = dev->dev_private;
+	struct drm_gem_object *obj;
+	struct virtio_gpu_object *bo;
+	struct virtio_gpu_mem_entry *ents;
+	unsigned int nents = table->nents;
+	struct scatterlist *sg;
+	int si;
+	int ret;
+	struct virtio_gpu_object_params params = { 0 };
+	size_t size = 0;
+	bool use_dma_api = !virtio_has_dma_quirk(vgdev->vdev);
+	/* FIXME: this is a temporary workaround to make things work */
+	use_dma_api = true;
+
+	obj = drm_gem_shmem_prime_import_sg_table(dev, attach, table);
+	if (IS_ERR(obj)) {
+		DRM_ERROR("failed to import sg_table\n");
+		return obj;
+	}
+
+	if (!vgdev->has_virgl_3d)
+		return obj;
+
+	bo = gem_to_virtio_gpu_obj(obj);
+	bo->guest_blob = true;
+	bo->host3d_blob = true;
+	bo->blob_mem = VIRTGPU_BLOB_MEM_PRIME;
+
+	ret = virtio_gpu_resource_id_get(vgdev, &bo->hw_res_handle);
+	if (ret < 0) {
+		drm_gem_shmem_free(&bo->base);
+		return ERR_PTR(ret);
+	}
+
+	ents = kvmalloc_array(nents,
+			sizeof(struct virtio_gpu_mem_entry),
+			GFP_KERNEL);
+	if (!ents) {
+		DRM_ERROR("failed to allocate ent list\n");
+		drm_gem_shmem_free(&bo->base);
+		return ERR_PTR(-ENOMEM);
+	}
+
+	if (use_dma_api) {
+		for_each_sgtable_dma_sg(table, sg, si) {
+			(ents)[si].addr = cpu_to_le64(sg_dma_address(sg));
+			(ents)[si].length = cpu_to_le32(sg_dma_len(sg));
+			(ents)[si].padding = 0;
+			size += sg_dma_len(sg);
+		}
+	} else {
+		for_each_sgtable_sg(table, sg, si) {
+			(ents)[si].addr = cpu_to_le64(sg_phys(sg));
+			(ents)[si].length = cpu_to_le32(sg->length);
+			(ents)[si].padding = 0;
+			size += sg->length;
+		}
+	}
+
+	params.blob_mem = bo->blob_mem;
+	params.size = size;
+	params.flags = VIRTGPU_BLOB_FLAG_USE_MAPPABLE;
+	params.blob_id = 0;
+	virtio_gpu_cmd_resource_create_blob(vgdev, bo, &params,
+					ents, nents);
+
+	return obj;
 }

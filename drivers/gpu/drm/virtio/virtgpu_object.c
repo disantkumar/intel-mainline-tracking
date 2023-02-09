@@ -23,10 +23,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "drm/drm_gem.h"
+#include "drm/drm_prime.h"
+#include "linux/module.h"
 #include <linux/dma-mapping.h>
 #include <linux/moduleparam.h>
 
 #include "virtgpu_drv.h"
+
+MODULE_IMPORT_NS(DMA_BUF);
 
 static int virtio_gpu_virglrenderer_workaround = 1;
 module_param_named(virglhack, virtio_gpu_virglrenderer_workaround, int, 0400);
@@ -96,9 +101,13 @@ static void virtio_gpu_object_del_restore_list(struct virtio_gpu_device *vgdev,
 void virtio_gpu_cleanup_object(struct virtio_gpu_object *bo)
 {
 	struct virtio_gpu_device *vgdev = bo->base.base.dev->dev_private;
+	struct drm_gem_object *obj = &bo->base.base;
 
 	virtio_gpu_resource_id_put(vgdev, bo->hw_res_handle);
-	if (virtio_gpu_is_shmem(bo)) {
+	if (obj->import_attach) {
+		drm_prime_gem_destroy(obj, bo->base.sgt);
+		drm_gem_free_mmap_offset(obj);
+	} else if (virtio_gpu_is_shmem(bo)) {
 		drm_gem_shmem_free(&bo->base);
 	} else if (virtio_gpu_is_vram(bo)) {
 		struct virtio_gpu_object_vram *vram = to_virtio_gpu_vram(bo);

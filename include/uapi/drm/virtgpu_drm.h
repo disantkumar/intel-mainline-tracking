@@ -188,6 +188,7 @@ struct drm_virtgpu_resource_create_blob {
 #define VIRTGPU_BLOB_MEM_GUEST             0x0001
 #define VIRTGPU_BLOB_MEM_HOST3D            0x0002
 #define VIRTGPU_BLOB_MEM_HOST3D_GUEST      0x0003
+#define VIRTGPU_BLOB_MEM_PRIME             0x0005
 
 #define VIRTGPU_BLOB_FLAG_USE_MAPPABLE     0x0001
 #define VIRTGPU_BLOB_FLAG_USE_SHAREABLE    0x0002
