@@ -4584,7 +4584,12 @@ int power_control_init(struct kbase_device *kbdev)
 #if ((KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE) && \
 	defined(CONFIG_REGULATOR))
 	if (kbdev->nr_regulators > 0) {
+#if (KERNEL_VERSION(6, 0, 0) <= LINUX_VERSION_CODE)
+		kbdev->opp_token = dev_pm_opp_set_regulators(kbdev->dev,
+#else
 		kbdev->opp_table = dev_pm_opp_set_regulators(kbdev->dev,
+#endif /* (KERNEL_VERSION(6, 0, 0) <= LINUX_VERSION_CODE) */
+
 #if (KERNEL_VERSION(6, 1, 0) <= LINUX_VERSION_CODE)
 			regulator_names
 #else
@@ -4629,7 +4634,11 @@ void power_control_term(struct kbase_device *kbdev)
 #if ((KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE) && \
 	defined(CONFIG_REGULATOR))
 	if (!IS_ERR_OR_NULL(kbdev->opp_table))
+#if (KERNEL_VERSION(6, 0, 0) <= LINUX_VERSION_CODE)
+		dev_pm_opp_put_regulators(kbdev->opp_token);
+#else
 		dev_pm_opp_put_regulators(kbdev->opp_table);
+#endif /* (KERNEL_VERSION(6, 0, 0) <= LINUX_VERSION_CODE */
 #endif /* (KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE */
 #endif /* CONFIG_PM_OPP */
 
