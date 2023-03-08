@@ -14,7 +14,7 @@
 #include <linux/pagemap.h>
 #include <linux/memremap.h>
 
-extern int isolate_lru_page(struct page *page);
+extern bool isolate_lru_page(struct page *page);
 extern void putback_lru_page(struct page *page);
 extern unsigned long reclaim_pages(struct list_head *page_list);
 
