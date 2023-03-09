@@ -12,6 +12,7 @@
 #include "linux/mman.h"
 #include "version_compat_defs.h"
 #include <mali_kbase.h>
+#include <linux/version.h>
 
 /* mali_kbase_mmap.c
  *

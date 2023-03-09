@@ -20,6 +20,7 @@
  */
 
 #include <mali_kbase.h>
+#include <linux/version.h>
 #include <linux/random.h>
 #include "backend/gpu/mali_kbase_model_dummy.h"
 
