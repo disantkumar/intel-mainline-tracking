@@ -1564,19 +1564,19 @@ void xhci_cleanup_command_queue(struct xhci_hcd *xhci)
 
 static bool xhci_pending_command_completion(struct xhci_hcd *xhci)
 {
-	struct xhci_segment	*seg = xhci->event_ring->deq_seg;
-	union xhci_trb		*deq = xhci->event_ring->dequeue;
+	struct xhci_segment	*seg = xhci->interrupter->event_ring->deq_seg;
+	union xhci_trb		*deq = xhci->interrupter->event_ring->dequeue;
 	u32			deq_flags = le32_to_cpu(deq->event_cmd.flags);
-	u32			cycle = xhci->event_ring->cycle_state;
+	u32			cycle = xhci->interrupter->event_ring->cycle_state;
 	int			i = 0;
 
 	/* Check if event ring contains an unhandled command completion */
 	while ((deq_flags & TRB_CYCLE) == cycle) {
 		if ((deq_flags & TRB_TYPE_BITMASK) == TRB_TYPE(TRB_COMPLETION))
 			return true;
-		if (last_trb_on_ring(xhci->event_ring, seg, deq))
+		if (last_trb_on_ring(xhci->interrupter->event_ring, seg, deq))
 			cycle ^= 1;
-		next_trb(xhci, xhci->event_ring,  &seg, &deq);
+		next_trb(xhci, xhci->interrupter->event_ring,  &seg, &deq);
 		deq_flags = le32_to_cpu(deq->event_cmd.flags);
 		if (i++ > TRBS_PER_SEGMENT)
 			break;
