@@ -1052,7 +1052,7 @@ ecryptfs_getxattr_lower(struct dentry *lower_dentry, struct inode *lower_inode,
 		goto out;
 	}
 	inode_lock(lower_inode);
-	rc = __vfs_getxattr(&init_user_ns, lower_dentry, lower_inode, name,
+	rc = __vfs_getxattr(&nop_mnt_idmap, lower_dentry, lower_inode, name,
 			    value, size, XATTR_NOSECURITY);
 	inode_unlock(lower_inode);
 out:
