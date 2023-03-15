@@ -25,10 +25,16 @@ int mtk_set_frequency(struct kbase_device *kbdev, unsigned long freq)
 	if (kbdev->current_freqs[0] == freq)
 		return 0;
 
-	err = clk_set_parent(ctx->clks[mux].clk, ctx->clks[sub].clk);
-	if (err) {
-		dev_err(kbdev->dev, "Failed to set sub clock as src: %d\n", err);
-		return err;
+	if (ctx->manual_mux_reparent) {
+		/*
+		 * The mux clock doesn't automatically switch to a stable clock
+		 * parent during PLL rate change, so we do it here.
+		 */
+		err = clk_set_parent(ctx->clks[mux].clk, ctx->clks[sub].clk);
+		if (err) {
+			dev_err(kbdev->dev, "Failed to set sub clock as src: %d\n", err);
+			return err;
+		}
 	}
 
 	/* Hard-coded rules about which clock should be used for freq setting */
@@ -49,10 +55,12 @@ int mtk_set_frequency(struct kbase_device *kbdev, unsigned long freq)
 	}
 	kbdev->current_freqs[0] = freq;
 
-	err = clk_set_parent(ctx->clks[mux].clk, ctx->clks[main].clk);
-	if (err) {
-		dev_err(kbdev->dev, "Failed to set main clock as src: %d\n", err);
-		return err;
+	if (ctx->manual_mux_reparent) {
+		err = clk_set_parent(ctx->clks[mux].clk, ctx->clks[main].clk);
+		if (err) {
+			dev_err(kbdev->dev, "Failed to set main clock as src: %d\n", err);
+			return err;
+		}
 	}
 
 	return 0;

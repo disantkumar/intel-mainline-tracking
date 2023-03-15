@@ -47,6 +47,7 @@ const struct mtk_hw_config mt8195_hw_config = {
 };
 
 struct mtk_platform_context mt8195_platform_context = {
+	.manual_mux_reparent = true,
 	.config = &mt8195_hw_config,
 };
 
