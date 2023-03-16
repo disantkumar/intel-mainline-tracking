@@ -405,7 +405,7 @@ static void handle_thermal_trip(struct thermal_zone_device *tz, int trip_id)
 	if (trip.type == THERMAL_TRIP_CRITICAL || trip.type == THERMAL_TRIP_HOT)
 		handle_critical_trips(tz, trip_id, trip.temperature, trip.type);
 	else
-		handle_non_critical_trips(tz, trip, type);
+		handle_non_critical_trips(tz, trip_id, trip.type);
 }
 
 static void update_temperature(struct thermal_zone_device *tz)
