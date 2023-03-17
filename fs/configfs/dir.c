@@ -1407,7 +1407,7 @@ static int configfs_mkdir(struct mnt_idmap *idmap, struct inode *dir,
 		inode->i_uid = ia.ia_uid;
 		inode->i_gid = ia.ia_gid;
 		/* the above manual assignments skip the permission checks */
-		configfs_setattr(mnt_userns, dentry, &ia);
+		configfs_setattr(&nop_mnt_idmap, dentry, &ia);
 	}
 
 	spin_lock(&configfs_dirent_lock);
