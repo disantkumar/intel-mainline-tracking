@@ -911,7 +911,7 @@ static int fuse_mkdir(struct mnt_idmap *idmap, struct inode *dir,
 	return create_new_entry(fm, &args, dir, entry, S_IFDIR);
 }
 
-static int fuse_chromeos_tmpfile(struct user_namespace *mnt_userns, struct inode *dir,
+static int fuse_chromeos_tmpfile(struct mnt_idmap *idmap, struct inode *dir,
 				 struct file *file, umode_t mode)
 {
 	struct fuse_chromeos_tmpfile_in inarg;
