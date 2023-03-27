@@ -25,7 +25,7 @@ int mtk_set_frequency(struct kbase_device *kbdev, unsigned long freq)
 	if (kbdev->current_freqs[0] == freq)
 		return 0;
 
-	if (ctx->manual_mux_reparent) {
+	if (ctx->manual_mux_reparent && cfg->num_clks > 1) {
 		/*
 		 * The mux clock doesn't automatically switch to a stable clock
 		 * parent during PLL rate change, so we do it here.
@@ -45,6 +45,9 @@ int mtk_set_frequency(struct kbase_device *kbdev, unsigned long freq)
 	case 4:
 		err = clk_set_rate(ctx->clks[main].clk, freq);
 		break;
+	case 1: /* upstream: only cg clock; set_rate is passed upwards; auto reparenting */
+		err = clk_set_rate(ctx->clks[0].clk, freq);
+		break;
 	default:
 		err = -EINVAL;
 		break;
@@ -55,7 +58,7 @@ int mtk_set_frequency(struct kbase_device *kbdev, unsigned long freq)
 	}
 	kbdev->current_freqs[0] = freq;
 
-	if (ctx->manual_mux_reparent) {
+	if (ctx->manual_mux_reparent && cfg->num_clks > 1) {
 		err = clk_set_parent(ctx->clks[mux].clk, ctx->clks[main].clk);
 		if (err) {
 			dev_err(kbdev->dev, "Failed to set main clock as src: %d\n", err);
@@ -116,6 +119,20 @@ int mtk_set_voltages(struct kbase_device *kbdev, unsigned long *target_volts, bo
 	if ((inc && kbdev->current_voltages[0] > target_volts[0]) ||
 	   (!inc && kbdev->current_voltages[0] < target_volts[0]))
 		return 0;
+
+	/* With upstream bindings, we let mtk-regulator-coupler driver handle vsram_gpu */
+	if (kbdev->nr_regulators == 1) {
+		err = regulator_set_voltage(kbdev->regulators[0], target_volts[0],
+					    target_volts[0] + cfg->supply_tolerance_microvolt);
+		if (err) {
+			dev_err(kbdev->dev, "Failed to set regulator voltage: %d\n", err);
+			return err;
+		}
+
+		kbdev->current_voltages[0] = target_volts[0];
+
+		return 0;
+	}
 
 	for (i = 0; i < kbdev->nr_regulators; i++)
 		step_volts[i] = kbdev->current_voltages[i];
