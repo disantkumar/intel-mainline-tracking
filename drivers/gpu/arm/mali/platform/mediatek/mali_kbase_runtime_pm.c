@@ -350,25 +350,25 @@ void kbase_pm_domain_term(struct kbase_device *kbdev)
 			dev_pm_domain_detach(kbdev->pm_domain_devs[i], true);
 }
 
-int kbase_pm_runtime_callback_init(struct kbase_device *kbdev)
+static int kbase_pm_runtime_callback_init(struct kbase_device *kbdev)
 {
 	return 0;
 }
 
-void kbase_pm_runtime_callback_term(struct kbase_device *kbdev)
+static void kbase_pm_runtime_callback_term(struct kbase_device *kbdev)
 {
 }
 
-int kbase_pm_runtime_callback_on(struct kbase_device *kbdev)
+static int kbase_pm_runtime_callback_on(struct kbase_device *kbdev)
 {
 	return 0;
 }
 
-void kbase_pm_runtime_callback_off(struct kbase_device *kbdev)
+static void kbase_pm_runtime_callback_off(struct kbase_device *kbdev)
 {
 }
 
-int kbase_pm_callback_power_on(struct kbase_device *kbdev)
+static int kbase_pm_callback_power_on(struct kbase_device *kbdev)
 {
 	int ret, err, reg_idx, pm_idx;
 	struct mtk_platform_context *ctx = kbdev->platform_context;
@@ -442,7 +442,7 @@ reg_err:
 	return ret;
 }
 
-void kbase_pm_callback_power_off(struct kbase_device *kbdev)
+static void kbase_pm_callback_power_off(struct kbase_device *kbdev)
 {
 	int err, i;
 	struct mtk_platform_context *ctx = kbdev->platform_context;
@@ -477,15 +477,33 @@ void kbase_pm_callback_power_off(struct kbase_device *kbdev)
 	}
 }
 
-void kbase_pm_callback_suspend(struct kbase_device *kbdev)
+static void kbase_pm_callback_suspend(struct kbase_device *kbdev)
 {
 	kbase_pm_callback_power_off(kbdev);
 }
 
-void kbase_pm_callback_resume(struct kbase_device *kbdev)
+static void kbase_pm_callback_resume(struct kbase_device *kbdev)
 {
 	kbase_pm_callback_power_on(kbdev);
 }
+
+struct kbase_pm_callback_conf mtk_pm_callbacks = {
+	.power_on_callback = kbase_pm_callback_power_on,
+	.power_off_callback = kbase_pm_callback_power_off,
+	.power_suspend_callback = kbase_pm_callback_suspend,
+	.power_resume_callback = kbase_pm_callback_resume,
+#ifdef KBASE_PM_RUNTIME
+	.power_runtime_init_callback = kbase_pm_runtime_callback_init,
+	.power_runtime_term_callback = kbase_pm_runtime_callback_term,
+	.power_runtime_on_callback = kbase_pm_runtime_callback_on,
+	.power_runtime_off_callback = kbase_pm_runtime_callback_off,
+#else				/* KBASE_PM_RUNTIME */
+	.power_runtime_init_callback = NULL,
+	.power_runtime_term_callback = NULL,
+	.power_runtime_on_callback = NULL,
+	.power_runtime_off_callback = NULL,
+#endif				/* KBASE_PM_RUNTIME */
+};
 
 int mtk_platform_init(struct kbase_device *kbdev)
 {

@@ -126,14 +126,6 @@ int mtk_mfgsys_init(struct kbase_device *kbdev);
 
 int kbase_pm_domain_init(struct kbase_device *kbdev);
 void kbase_pm_domain_term(struct kbase_device *kbdev);
-int kbase_pm_runtime_callback_init(struct kbase_device *kbdev);
-void kbase_pm_runtime_callback_term(struct kbase_device *kbdev);
-int kbase_pm_runtime_callback_on(struct kbase_device *kbdev);
-void kbase_pm_runtime_callback_off(struct kbase_device *kbdev);
-int kbase_pm_callback_power_on(struct kbase_device *kbdev);
-void kbase_pm_callback_power_off(struct kbase_device *kbdev);
-void kbase_pm_callback_suspend(struct kbase_device *kbdev);
-void kbase_pm_callback_resume(struct kbase_device *kbdev);
 
 int mtk_platform_init(struct kbase_device *kbdev);
 void platform_term(struct kbase_device *kbdev);
