@@ -43,6 +43,7 @@ extern struct kbase_clk_rate_trace_op_conf clk_rate_trace_ops;
 extern struct kbase_pm_callback_conf mtk_pm_callbacks;
 
 extern struct kbase_platform_funcs_conf mt8183_platform_funcs;
+extern struct kbase_platform_funcs_conf mt8183b_platform_funcs;
 extern struct kbase_platform_funcs_conf mt8192_platform_funcs;
 extern struct kbase_platform_funcs_conf mt8195_platform_funcs;
 extern struct kbase_platform_funcs_conf mt8186_platform_funcs;
