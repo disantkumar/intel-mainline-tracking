@@ -6,7 +6,7 @@ config DRM_DP_AUX_BUS
 	depends on OF || COMPILE_TEST
 
 config DRM_DISPLAY_HELPER
-	tristate
+	bool
 	depends on DRM
 	help
 	  DRM helpers for display adapters.

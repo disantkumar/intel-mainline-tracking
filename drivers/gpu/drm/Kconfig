@@ -6,7 +6,7 @@
 # Direct Rendering Infrastructure (DRI) in XFree86 4.1.0 and higher.
 #
 menuconfig DRM
-	tristate "Direct Rendering Manager (XFree86 4.1.0 and higher DRI support)"
+	bool "Direct Rendering Manager (XFree86 4.1.0 and higher DRI support)"
 	depends on (AGP || AGP=n) && !EMULATED_CMPXCHG && HAS_DMA
 	select DRM_PANEL_ORIENTATION_QUIRKS
 	select HDMI
@@ -93,7 +93,7 @@ config DRM_KUNIT_TEST
 	  If in doubt, say "N".
 
 config DRM_KMS_HELPER
-	tristate
+	bool
 	depends on DRM
 	help
 	  CRTC helpers for KMS drivers.
@@ -208,13 +208,13 @@ config DRM_BUDDY
 	  A page based buddy allocator
 
 config DRM_VRAM_HELPER
-	tristate
+	bool
 	depends on DRM
 	help
 	  Helpers for VRAM memory management
 
 config DRM_TTM_HELPER
-	tristate
+	bool
 	depends on DRM
 	select DRM_TTM
 	help
@@ -223,13 +223,13 @@ config DRM_TTM_HELPER
 source "drivers/gpu/drm/ttm/Kconfig"
 
 config DRM_GEM_DMA_HELPER
-	tristate
+	bool
 	depends on DRM
 	help
 	  Choose this if you need the GEM DMA helper functions
 
 config DRM_GEM_SHMEM_HELPER
-	tristate
+	bool
 	depends on DRM && MMU
 	help
 	  Choose this if you need the GEM shmem helper functions
