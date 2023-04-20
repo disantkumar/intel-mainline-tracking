@@ -1266,14 +1266,15 @@ end:
  */
 static int pci_set_full_power_state(struct pci_dev *dev)
 {
-	u16 pmcsr;
+	u16 pmcsr = 0;
 	int ret;
 
 	ret = pci_power_up(dev);
 	if (ret < 0)
 		return ret;
 
-	pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pmcsr);
+	if (dev->pm_cap)
+		pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pmcsr);
 	dev->current_state = pmcsr & PCI_PM_CTRL_STATE_MASK;
 	if (dev->current_state != PCI_D0) {
 		pci_info_ratelimited(dev, "Refused to change power state from %s to D0\n",
