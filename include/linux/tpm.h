@@ -138,6 +138,8 @@ struct tpm_chip {
 	int dev_num;		/* /dev/tpm# */
 	unsigned long is_open;	/* only one allowed */
 
+	bool is_suspended;
+
 	char hwrng_name[64];
 	struct hwrng hwrng;
 
@@ -153,7 +155,7 @@ struct tpm_chip {
 
 	struct dentry *bios_dir[TPM_NUM_EVENT_LOG_FILES];
 
-	const struct attribute_group *groups[3 + TPM_MAX_HASHES];
+	const struct attribute_group *groups[4 + TPM_MAX_HASHES];
 	unsigned int groups_cnt;
 
 	u32 nr_allocated_banks;
@@ -254,7 +256,24 @@ enum tpm2_capabilities {
 };
 
 enum tpm2_properties {
-	TPM_PT_TOTAL_COMMANDS	= 0x0129,
+	TPM_PT_TOTAL_COMMANDS		= 0x0129,
+};
+
+enum tpm2_attr_permanent {
+	TPM2_ATTR_OWNER_AUTH_SET	= BIT(0),
+	TPM2_ATTR_ENDORSEMENT_AUTH_SET	= BIT(1),
+	TPM2_ATTR_LOCKOUT_AUTH_SET	= BIT(2),
+	TPM2_ATTR_DISABLE_CLEAR		= BIT(8),
+	TPM2_ATTR_IN_LOCKOUT		= BIT(9),
+	TPM2_ATTR_TPM_GENERATED_EPS	= BIT(10),
+};
+
+enum tpm2_attr_startup_clear {
+	TPM2_ATTR_PH_ENABLE		= BIT(0),
+	TPM2_ATTR_SH_ENABLE		= BIT(1),
+	TPM2_ATTR_EH_ENABLE		= BIT(2),
+	TPM2_ATTR_PH_ENABLE_NV		= BIT(3),
+	TPM2_ATTR_ORDERLY		= BIT(31),
 };
 
 enum tpm2_startup_types {

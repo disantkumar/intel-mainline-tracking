@@ -124,6 +124,7 @@ struct tpm_tis_phy_ops {
 			   const u8 *value, enum tpm_tis_io_mode mode);
 	int (*verify_crc)(struct tpm_tis_data *data, size_t len,
 			  const u8 *value);
+	u16 max_xfer_size;
 };
 
 static inline int tpm_tis_read_bytes(struct tpm_tis_data *data, u32 addr,
