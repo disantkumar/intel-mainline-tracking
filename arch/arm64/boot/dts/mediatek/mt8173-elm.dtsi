@@ -217,6 +217,11 @@
 	status = "okay";
 };
 
+&gpu {
+	mfgsys-power-supply = <&da9211_vgpu_reg>;
+	status = "okay";
+};
+
 &hdmi0 {
 	status = "okay";
 	ports {
@@ -284,8 +289,8 @@
 		};
 
 		aux-bus {
-			panel: panel {
-				compatible = "lg,lp120up1";
+			panel {
+				compatible = "edp-panel";
 				power-supply = <&panel_fixed_3v3>;
 				backlight = <&backlight>;
 

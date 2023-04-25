@@ -545,6 +545,7 @@
 		pinctrl-0 = <&bt_en>, <&sw_ctrl>;
 		enable-gpios = <&tlmm 85 GPIO_ACTIVE_HIGH>;
 		swctrl-gpios = <&tlmm 86 GPIO_ACTIVE_HIGH>;
+		wlan-gpio = <&tlmm 84 GPIO_ACTIVE_HIGH>;
 		vddaon-supply = <&vreg_s7b_0p9>;
 		vddbtcxmx-supply = <&vreg_s7b_0p9>;
 		vddrfacmn-supply = <&vreg_s7b_0p9>;
@@ -636,16 +637,19 @@
 };
 
 &qspi_cs0 {
-	bias-disable;
+	bias-disable;		/* External pullup */
 };
 
 &qspi_clk {
-	bias-disable;
+	bias-pull-down;		/* No external pulls or external pulldown */
 };
 
-&qspi_data01 {
-	/* High-Z when no transfers; nice to park the lines */
-	bias-pull-up;
+&qspi_data0 {
+	bias-pull-down;		/* No external pulls or external pulldown */
+};
+
+&qspi_data1 {
+	bias-pull-down;		/* No external pulls or external pulldown */
 };
 
 &qup_uart5_tx {

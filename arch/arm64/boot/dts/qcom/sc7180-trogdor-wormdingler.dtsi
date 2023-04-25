@@ -8,6 +8,7 @@
 /dts-v1/;
 
 #include "sc7180-trogdor.dtsi"
+#include "sc7180-trogdor-mipi-camera.dtsi"
 
 / {
 	avdd_lcd: avdd-lcd-regulator {
@@ -144,6 +145,10 @@
 			};
 		};
 	};
+};
+
+&mdp {
+	chromium-enable-overlays;
 };
 
 &i2c4 {
