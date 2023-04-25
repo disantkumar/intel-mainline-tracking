@@ -214,12 +214,12 @@ static inline int ovl_do_symlink(struct ovl_fs *ofs,
 static inline ssize_t ovl_do_getxattr(const struct path *path, const char *name,
 				      void *value, size_t size)
 {
+	struct inode *ip = d_inode(path->dentry);
 	int err, len;
 
 	WARN_ON(path->dentry->d_sb != path->mnt->mnt_sb);
 
-	err = vfs_getxattr(mnt_idmap(path->mnt), path->dentry,
-			       name, value, size);
+	err = __vfs_getxattr(mnt_idmap(path->mnt), path->dentry, ip, name, value, size, XATTR_NOSECURITY);
 	len = (value && err > 0) ? err : 0;
 
 	pr_debug("getxattr(%pd2, \"%s\", \"%*pE\", %zu, 0) = %i\n",
@@ -369,6 +369,7 @@ int ovl_want_write(struct dentry *dentry);
 void ovl_drop_write(struct dentry *dentry);
 struct dentry *ovl_workdir(struct dentry *dentry);
 const struct cred *ovl_override_creds(struct super_block *sb);
+void ovl_revert_creds(struct super_block *sb, const struct cred *oldcred);
 int ovl_can_decode_fh(struct super_block *sb);
 struct dentry *ovl_indexdir(struct super_block *sb);
 bool ovl_index_all(struct super_block *sb);
@@ -606,7 +607,7 @@ int ovl_permission(struct mnt_idmap *idmap, struct inode *inode,
 int ovl_xattr_set(struct dentry *dentry, struct inode *inode, const char *name,
 		  const void *value, size_t size, int flags);
 int ovl_xattr_get(struct dentry *dentry, struct inode *inode, const char *name,
-		  void *value, size_t size);
+		  void *value, size_t size, int flags);
 ssize_t ovl_listxattr(struct dentry *dentry, char *list, size_t size);
 
 #ifdef CONFIG_FS_POSIX_ACL

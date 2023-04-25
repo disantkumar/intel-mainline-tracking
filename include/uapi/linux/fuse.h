@@ -406,6 +406,7 @@ struct fuse_file_lock {
 #define FUSE_SECURITY_CTX	(1ULL << 32)
 #define FUSE_HAS_INODE_DAX	(1ULL << 33)
 #define FUSE_CREATE_SUPP_GROUP	(1ULL << 34)
+#define FUSE_PASSTHROUGH	(1ULL << 34)
 
 /**
  * CUSE INIT request/reply flags
@@ -579,6 +580,9 @@ enum fuse_opcode {
 	/* Reserved opcodes: helpful to detect structure endian-ness */
 	CUSE_INIT_BSWAP_RESERVED	= 1048576,	/* CUSE_INIT << 8 */
 	FUSE_INIT_BSWAP_RESERVED	= 436207616,	/* FUSE_INIT << 24 */
+
+	/* Chrome OS extensions */
+	FUSE_CHROMEOS_TMPFILE	= 0xffffffff,	/* u32::MAX */
 };
 
 enum fuse_notify_code {
@@ -695,10 +699,15 @@ struct fuse_create_in {
 	uint32_t	open_flags;	/* FUSE_OPEN_... */
 };
 
+struct fuse_chromeos_tmpfile_in {
+	uint32_t mode;
+	uint32_t umask;
+};
+
 struct fuse_open_out {
 	uint64_t	fh;
 	uint32_t	open_flags;
-	uint32_t	padding;
+	uint32_t	passthrough_fh;
 };
 
 struct fuse_release_in {
@@ -909,6 +918,14 @@ struct fuse_in_header {
 	uint16_t	padding;
 };
 
+/* fuse_passthrough_out for passthrough V1 */
+struct fuse_passthrough_out {
+	uint32_t	fd;
+	/* For future implementation */
+	uint32_t	len;
+	void		*vec;
+};
+
 struct fuse_out_header {
 	uint32_t	len;
 	int32_t		error;
@@ -989,6 +1006,8 @@ struct fuse_notify_retrieve_in {
 /* Device ioctls: */
 #define FUSE_DEV_IOC_MAGIC		229
 #define FUSE_DEV_IOC_CLONE		_IOR(FUSE_DEV_IOC_MAGIC, 0, uint32_t)
+/* 127 is reserved for the V1 interface implementation in Android */
+#define FUSE_DEV_IOC_PASSTHROUGH_OPEN	_IOW(FUSE_DEV_IOC_MAGIC, 127, struct fuse_passthrough_out)
 
 struct fuse_lseek_in {
 	uint64_t	fh;
