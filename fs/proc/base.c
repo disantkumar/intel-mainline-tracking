@@ -3701,6 +3701,9 @@ static const struct pid_entry tid_base_stuff[] = {
 	ONE("ksm_merging_pages",  S_IRUSR, proc_pid_ksm_merging_pages),
 	ONE("ksm_stat",  S_IRUSR, proc_pid_ksm_stat),
 #endif
+#ifdef CONFIG_PROC_LATSENSE
+	REG("latency_sensitive",  S_IRUGO|S_IWUSR, proc_tid_latsense_operations),
+#endif
 };
 
 static int proc_tid_base_readdir(struct file *file, struct dir_context *ctx)
