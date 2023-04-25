@@ -54,7 +54,7 @@ static void t7xx_port_ctrl_stop(struct wwan_port *port)
 static int t7xx_port_ctrl_tx(struct wwan_port *port, struct sk_buff *skb)
 {
 	struct t7xx_port *port_private = wwan_port_get_drvdata(port);
-	size_t len, offset, chunk_len = 0, txq_mtu = CLDMA_MTU;
+	size_t len, offset, chunk_len = 0, txq_mtu;
 	const struct t7xx_port_conf *port_conf;
 	struct t7xx_fsm_ctl *ctl;
 	enum md_state md_state;
@@ -72,6 +72,7 @@ static int t7xx_port_ctrl_tx(struct wwan_port *port, struct sk_buff *skb)
 		return -ENODEV;
 	}
 
+	txq_mtu = t7xx_get_port_mtu(port_private);
 	for (offset = 0; offset < len; offset += chunk_len) {
 		struct sk_buff *skb_ccci;
 		int ret;
@@ -133,24 +134,6 @@ static int t7xx_port_wwan_recv_skb(struct t7xx_port *port, struct sk_buff *skb)
 	return 0;
 }
 
-static int t7xx_port_wwan_enable_chl(struct t7xx_port *port)
-{
-	spin_lock(&port->port_update_lock);
-	port->chan_enable = true;
-	spin_unlock(&port->port_update_lock);
-
-	return 0;
-}
-
-static int t7xx_port_wwan_disable_chl(struct t7xx_port *port)
-{
-	spin_lock(&port->port_update_lock);
-	port->chan_enable = false;
-	spin_unlock(&port->port_update_lock);
-
-	return 0;
-}
-
 static void t7xx_port_wwan_md_state_notify(struct t7xx_port *port, unsigned int state)
 {
 	const struct t7xx_port_conf *port_conf = port->port_conf;
@@ -170,7 +153,7 @@ struct port_ops wwan_sub_port_ops = {
 	.init = t7xx_port_wwan_init,
 	.recv_skb = t7xx_port_wwan_recv_skb,
 	.uninit = t7xx_port_wwan_uninit,
-	.enable_chl = t7xx_port_wwan_enable_chl,
-	.disable_chl = t7xx_port_wwan_disable_chl,
+	.enable_chl = t7xx_port_enable_chl,
+	.disable_chl = t7xx_port_disable_chl,
 	.md_state_notify = t7xx_port_wwan_md_state_notify,
 };
