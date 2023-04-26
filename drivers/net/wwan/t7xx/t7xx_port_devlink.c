@@ -406,7 +406,7 @@ bool t7xx_devlink_param_get_fastboot(struct devlink *devlink)
 {
 	union devlink_param_value saved_value;
 
-	devlink_param_driverinit_value_get(devlink, T7XX_DEVLINK_PARAM_ID_FASTBOOT,
+	devl_param_driverinit_value_get(devlink, T7XX_DEVLINK_PARAM_ID_FASTBOOT,
 					   &saved_value);
 	return saved_value.vbool;
 }
@@ -613,8 +613,7 @@ int t7xx_devlink_register(struct t7xx_pci_dev *t7xx_dev)
 	t7xx_dev->dl->t7xx_dev = t7xx_dev;
 	devlink_params_register(dl_ctx, t7xx_devlink_params, ARRAY_SIZE(t7xx_devlink_params));
 	value.vbool = false;
-	devlink_param_driverinit_value_set(dl_ctx, T7XX_DEVLINK_PARAM_ID_FASTBOOT, value);
-	devlink_set_features(dl_ctx, DEVLINK_F_RELOAD);
+	devl_param_driverinit_value_set(dl_ctx, T7XX_DEVLINK_PARAM_ID_FASTBOOT, value);
 	devlink_register(dl_ctx);
 
 	return 0;
