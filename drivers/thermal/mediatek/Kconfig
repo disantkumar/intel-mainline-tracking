@@ -10,10 +10,8 @@ config MTK_THERMAL
 if MTK_THERMAL
 
 config MTK_SOC_THERMAL
-	tristate "AUXADC temperature sensor driver for MediaTek SoCs"
+	bool "AUXADC temperature sensor driver for MediaTek SoCs"
 	depends on HAS_IOMEM
-	depends on NVMEM
-	depends on RESET_CONTROLLER
 	depends on CPU_FREQ
 	help
 	  Enable this option if you want to get SoC temperature
