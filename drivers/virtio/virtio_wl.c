@@ -1062,7 +1062,7 @@ static int virtwl_vfd_mmap(struct file *filp, struct vm_area_struct *vma)
 	if (ret)
 		goto out_unlock;
 
-	vma->vm_flags |= VM_PFNMAP | VM_IO | VM_DONTEXPAND | VM_DONTDUMP;
+	vm_flags_set(vma, VM_PFNMAP | VM_IO | VM_DONTEXPAND | VM_DONTDUMP);
 
 out_unlock:
 	mutex_unlock(&vfd->lock);
