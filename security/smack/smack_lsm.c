@@ -292,7 +292,7 @@ static struct smack_known *smk_fetch(const char *name, struct inode *ip,
 	if (buffer == NULL)
 		return ERR_PTR(-ENOMEM);
 
-	rc = __vfs_getxattr(&init_user_ns, dp, ip, name, buffer, SMK_LONGLABEL,
+	rc = __vfs_getxattr(&nop_mnt_idmap, dp, ip, name, buffer, SMK_LONGLABEL,
 			    XATTR_NOSECURITY);
 	if (rc < 0)
 		skp = ERR_PTR(rc);
@@ -3513,7 +3513,7 @@ static void smack_d_instantiate(struct dentry *opt_dentry, struct inode *inode)
 					TRANS_TRUE, TRANS_TRUE_SIZE,
 					0);
 			} else {
-				rc = __vfs_getxattr(&init_user_ns, dp, inode,
+				rc = __vfs_getxattr(&nop_mnt_idmap, dp, inode,
 					XATTR_NAME_SMACKTRANSMUTE, trattr,
 					TRANS_TRUE_SIZE, XATTR_NOSECURITY);
 				if (rc >= 0 && strncmp(trattr, TRANS_TRUE,
