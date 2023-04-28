@@ -19,7 +19,7 @@
  */
 #define MAX_BLOCKS    12
 
-#define DPU_HW_VER(MAJOR, MINOR, STEP) (((MAJOR & 0xF) << 28)    |\
+#define DPU_HW_VER(MAJOR, MINOR, STEP) ((((unsigned int)MAJOR & 0xF) << 28)    |\
 		((MINOR & 0xFFF) << 16)  |\
 		(STEP & 0xFFFF))
 
