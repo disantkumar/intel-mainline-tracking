@@ -103,7 +103,7 @@ void intel_uc_fw_change_status(struct intel_uc_fw *uc_fw,
 	fw_def(SKYLAKE,      0, guc_mmp(skl,  70, 1, 1))
 
 #define INTEL_HUC_FIRMWARE_DEFS(fw_def, huc_raw, huc_mmp, huc_gsc, huc_gsc_mmp) \
-	fw_def(METEORLAKE,   0, huc_gsc_mmp(mtl, 8, 4, 3)) \
+	fw_def(METEORLAKE,   0, huc_gsc(mtl)) \
 	fw_def(DG2,          0, huc_gsc(dg2)) \
 	fw_def(ALDERLAKE_P,  0, huc_raw(tgl)) \
 	fw_def(ALDERLAKE_P,  0, huc_mmp(tgl,  7, 9, 3)) \
@@ -124,7 +124,7 @@ void intel_uc_fw_change_status(struct intel_uc_fw *uc_fw,
 	fw_def(SKYLAKE,      0, huc_mmp(skl,  2, 0, 0))
 
 #define INTEL_GSC_FIRMWARE_DEFS(fw_def, gsc_def) \
-	fw_def(METEORLAKE,   0, gsc_def(mtl, 102, 0, 0, 1511))
+	fw_def(METEORLAKE,   0, gsc_def(mtl, 1, 0))
 
 /*
  * Set of macros for producing a list of filenames from the above table.
@@ -180,8 +180,8 @@ void intel_uc_fw_change_status(struct intel_uc_fw *uc_fw,
 #define MAKE_HUC_FW_PATH_MMP(prefix_, major_, minor_, patch_) \
 	__MAKE_UC_FW_PATH_MMP(prefix_, "huc", major_, minor_, patch_)
 
-#define MAKE_GSC_FW_PATH(prefix_, major_, minor_, patch, build_) \
-	__MAKE_UC_FW_PATH_MMPB(prefix_, "gsc", major_, minor_, patch, build_)
+#define MAKE_GSC_FW_PATH(prefix_, major_, minor_) \
+	__MAKE_UC_FW_PATH_MAJOR(prefix_, "gsc", major_)
 
 /*
  * All blobs need to be declared via MODULE_FIRMWARE().
@@ -247,9 +247,9 @@ struct __packed uc_fw_blob {
 	UC_FW_BLOB_NEW(major_, minor_, patch_, true, \
 		       MAKE_HUC_FW_PATH_GSC_MMP(prefix_, major_, minor_, patch_))
 
-#define GSC_FW_BLOB(prefix_, major_, minor_, patch_, build_) \
-	UC_FW_BLOB_OLD(major_, minor_, patch_, \
-		       MAKE_GSC_FW_PATH(prefix_, major_, minor_, patch_, build_))
+#define GSC_FW_BLOB(prefix_, major_, minor_) \
+	UC_FW_BLOB_NEW(major_, minor_, 0, true, \
+		       MAKE_GSC_FW_PATH(prefix_, major_, minor_))
 
 struct __packed uc_fw_platform_requirement {
 	enum intel_platform p;
